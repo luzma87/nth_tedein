@@ -43,7 +43,7 @@ class PaginaWebController {
                 pags = Pagina.findAllByTipoPagina(tipo)
             }
         }
-        println "mostrando pagina " + pagina + " sitio " + sitio + " tipo " + tipo
+//        println "mostrando pagina " + pagina + " sitio " + sitio + " tipo " + tipo
         if (pagina)
             [pagina: pagina, pags: pags]
         else

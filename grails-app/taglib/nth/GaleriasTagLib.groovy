@@ -6,7 +6,7 @@ class GaleriasTagLib {
 
     def renderGal = { params ->
 
-        println "mostrando galeria con layout: " + params.galeria.layout
+//        println "mostrando galeria con layout: " + params.galeria.layout
 
         switch (params.galeria.layout) {
             case "galleryView":
@@ -115,8 +115,8 @@ class GaleriasTagLib {
 
         html = '<div id="showcase_' + gal.id + '" class="showcase" ' + shh + ' >'
         (Foto.findAllByGaleria(gal, [sort: "id"])).each { foto ->
-            def titulo = foto.frases.find { it.tipo == "Titulo"}
-            def descrp = foto.frases.find { it.tipo == "Descripcion"}
+            def titulo = foto.frases.find { it.tipo == "Titulo" }
+            def descrp = foto.frases.find { it.tipo == "Descripcion" }
 
             html += '<div class="showcase-slide" ' + shh + '>'
 
@@ -267,8 +267,8 @@ class GaleriasTagLib {
             maxX.times {
                 if (cont < fotos.size()) {
                     def foto = fotos[cont]
-                    def titulo = foto.frases.find { it.tipo == "Titulo"}
-                    def descrp = foto.frases.find { it.tipo == "Descripcion"}
+                    def titulo = foto.frases.find { it.tipo == "Titulo" }
+                    def descrp = foto.frases.find { it.tipo == "Descripcion" }
                     cont++
                     html += '<td style="' + cellCss + '">'
                     html += ig.img(["class": "linkFotoLight", "src": g.createLink(action: 'showImage', controller: 'image', id: foto?.id, params: [thumbnail: true]), "big": g.createLink(action: 'showImage', controller: 'image', id: foto?.id, params: [thumbnail: false]), "alt": titulo, "title": descrp]) + "\n"
@@ -391,8 +391,8 @@ class GaleriasTagLib {
 
         html += '<ul id="jc">' + "\n"
         (Foto.findAllByGaleria(gal, [sort: "id"])).eachWithIndex { foto, i ->
-            def titulo = foto.frases.find { it.tipo == "Titulo"}
-            def descrp = foto.frases.find { it.tipo == "Descripcion"}
+            def titulo = foto.frases.find { it.tipo == "Titulo" }
+            def descrp = foto.frases.find { it.tipo == "Descripcion" }
 
 
             html += '<li>' + "\n"
@@ -415,11 +415,11 @@ class GaleriasTagLib {
         def props = ""
         conf.eachWithIndex {
             obj, i ->
-            props += "" + obj.key + ":" + obj.value
-            if (i < conf.size() - 1) {
-                props += ","
-            }
-            props += "\n"
+                props += "" + obj.key + ":" + obj.value
+                if (i < conf.size() - 1) {
+                    props += ","
+                }
+                props += "\n"
         }
         js += props
 
@@ -523,8 +523,8 @@ class GaleriasTagLib {
         // All images with class of "cloudcarousel" will be turned into carousel items
         // You can place links around these images
         (Foto.findAllByGaleria(gal, [sort: "id"])).eachWithIndex { foto, i ->
-            def titulo = foto.frases.find { it.tipo == "Titulo"}
-            def descrp = foto.frases.find { it.tipo == "Descripcion"}
+            def titulo = foto.frases.find { it.tipo == "Titulo" }
+            def descrp = foto.frases.find { it.tipo == "Descripcion" }
 
             if (i == 0) {
                 html += ig.img(["src": g.createLink(action: 'showImage', controller: 'image', id: foto?.id, params: [thumbnail: false]), "alt": descrp, "title": titulo, "class": "cloudcarousel front"]) + "\n"
@@ -607,29 +607,21 @@ class GaleriasTagLib {
     } //cloudCarousel
 
     def galleryView = { params ->
-
         def gal = params.galeria
-
-        //println "galleryView de la galeria " + gal
-
+//        println "galleryView de la galeria " + gal
         def includes, css, html, js
-
         def background = params.remove("background")
-
         def borderWidth = params.remove("border-width")
         def borderColor = params.remove("border-color")
         def borderStyle = params.remove("border-style")
-
         def h = params.remove("infoH")
         try {
             h = h.toInteger()
         } catch (e) {
             h = 50
         }
-
         def panelWidth = 0
         def panelHeight = 0
-
         def conf = [
                 panel_width: 300,
                 panel_height: 300,
@@ -697,8 +689,8 @@ class GaleriasTagLib {
         html += '<ul id="myGallery">' + "\n"
         (Foto.findAllByGaleria(gal, [sort: "id"])).each { foto ->
 
-            def titulo = foto.frases.find { it.tipo == "Titulo"}
-            def descrp = foto.frases.find { it.tipo == "Descripcion"}
+            def titulo = foto.frases.find { it.tipo == "Titulo" }
+            def descrp = foto.frases.find { it.tipo == "Descripcion" }
 
             html += '<li>' + "\n"
             html += ig.img(["src": g.createLink(action: 'showImage', controller: 'image', id: foto?.id, params: [thumbnail: false]), "alt": titulo, "title": titulo]) + "\n"
@@ -732,7 +724,7 @@ class GaleriasTagLib {
 
         js = '<script type="text/javascript">' + "\n"
         js += '$(document).ready(function() {' + "\n"
-
+        js += "setTimeout(function(){ "
         js += '$("#myGallery").galleryView({' + "\n"
         def props = ""
 
@@ -787,6 +779,10 @@ class GaleriasTagLib {
         js += 'var w = parseInt($(".gv-gallery").width());' + "\n"
         js += '$(".gv-gallery").width(w+' + b + ');' + "\n"
 
+//        js+='$("#myGallery").css("visibility", "visible");'
+//        js+='$("#myGallery").show();'
+//        js+='$(".gv-loader").hide();'
+        js += "}, 500);"
         js += '});' + "\n"
         js += '</script>' + "\n"
 

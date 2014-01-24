@@ -91,13 +91,10 @@ class ContenidoTagLib {
                 break;
             case "Galeria":
                 def gal = seccion.galeria
-                println "intentando mostrar la galeria " + gal
-
+//                println "intentando mostrar la galeria " + gal
                 if (gal) {
-
                     def parms = [:]
                     parms.galeria = gal
-
                     def props = gal.propiedades
                     def parts = props.split(",")
                     parts.each {
@@ -106,11 +103,9 @@ class ContenidoTagLib {
                             parms[p[0]] = p[1]
                         }
                     }
-
                     out << gl.renderGal(parms)
                 }
                 break;
-
             case "Layout":
                 if (seccion.contenido) {
                     def pagina = seccion.contenido

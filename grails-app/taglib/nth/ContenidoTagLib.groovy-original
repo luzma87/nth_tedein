@@ -75,7 +75,7 @@ class ContenidoTagLib {
                 break;
             case "Galeria":
                 def gal = seccion.galeria
-                println "intentando mostrar la galeria " + gal
+                println "intentando mostrar la galeria 3 " + gal
 
                 if (gal) {
 
