@@ -1,0 +1,244 @@
+package nth
+
+class ContenidoTagLib {
+
+    def mostrarSeccion = {attrs ->
+        def id = attrs["id"]
+        def idIdioma = attrs["idioma"]
+        def tipo = attrs["tipo"]
+
+        def seccion = Seccion.get(id)
+        def idioma = Idioma.get(idIdioma)
+
+        if (!seccion.contenido) {
+            if (seccion.tipo == "Publicaciones") {
+//                out << "<div name='testP' style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;${seccion.css}'>"
+                out << "<div name='test' style='overflow-x:hidden; overflow-y:auto;position:absolute;top:${seccion.top}px;left:${seccion.izq}px;height:${seccion.height}px;${seccion.css}'>"
+            } else {
+                out << "<div name='test' style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;width:${seccion.width}px;height:${seccion.height}px;${seccion.css}'>"
+            }
+        } else {
+            if (seccion.tipo == "Layout") {
+                out << '<div class="contendido" style="position:absolute;top:' + seccion.contenido.layout.contenido.top + ';left:' + seccion.contenido.layout.contenido.izq + ';width:' + seccion.contenido.layout.contenido.width + ';height:' + seccion.contenido.layout.contenido.height + ';' + seccion.contenido.layout.contenido.css + '">'
+            } else {
+                out << "<div style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;width:${seccion.width}px;height:${seccion.height}px;${seccion.css}'>"
+            }
+        }
+
+        switch (seccion.tipo) {
+            case "Texto":
+                seccion.frases.each {
+                    if (it.idioma == idioma && it.estado == tipo)
+                        out << it.frase
+                }
+                break;
+            case "Link":
+                def sitio = session.sitio
+
+                /* todo  borrar esto*/
+                if (!sitio)
+                    sitio = Sitio.findByNombre("fine")
+
+                out << "<a href='${createLink(uri: "/")}pagina/${sitio.nombre}/${seccion.contenido.nombre}'>"
+                seccion.frases.each {
+                    if (it.idioma == idioma && it.estado == tipo) {
+                        out << it.frase
+                    }
+                }
+                out << "</a>"
+
+                break;
+            case "Foto":
+                def image = seccion.foto
+                out << ig.img(["src": g.createLink(action: 'showImage', controller: 'image', id: image?.id), "alt": image?.caption, "title": image?.caption, "thumbnailSrc": g.createLink(action: 'showImage', controller: 'image', id: image?.id, params: [thumbnail: true])])
+                break;
+            case "Galeria":
+                def gal = seccion.galeria
+                println "intentando mostrar la galeria " + gal
+
+                if (gal) {
+
+                    def parms = [:]
+                    parms.galeria = gal
+
+                    def props = gal.propiedades
+                    def parts = props.split(",")
+                    parts.each {
+                        def p = it.split(":")
+                        if (p.size() == 2) {
+                            parms[p[0]] = p[1]
+                        }
+                    }
+
+                    out << gl.renderGal(parms)
+                }
+                break;
+
+            case "Layout":
+                if (seccion.contenido) {
+                    def pagina = seccion.contenido
+
+                    /* TODO  esta en tipo borrado ojo */
+                    pagina.secciones.each {
+                        out << g.mostrarSeccion(id: it.id, idioma: session.idioma.id, tipo: "Borrador")
+                    }
+
+
+                }
+                break;
+            case "Publicaciones":
+                def pag = seccion.pagina
+                println "\n\n>>> Publicaciones"
+                println pag
+                def pags = []
+                if (pag) {
+                    def tipoPagina = TipoPagina.findByPagina(pag)
+                    println tipoPagina
+                    if (tipoPagina) {
+                        if (!params.id) {
+                            pags = Pagina.findAllByTipoPagina(tipoPagina)
+                        }
+                    }
+                    println pags
+                    pags.each { p ->
+                        println p
+                        out << "<div style='width:" + p.layout.contenido.width + "px; height:" + p.layout.contenido.height + "px; position:relative;'>"
+                        /* TODO  esta en tipo borrado ojo */
+//                        def image = p.foto
+                        //                        out << ig.img(["src": g.createLink(action: 'showImage', controller: 'image', id: image?.id), "alt": image?.caption, "title": image?.caption, "thumbnailSrc": g.createLink(action: 'showImage', controller: 'image', id: image?.id, params: [thumbnail: true])])
+
+                        p.secciones.each {
+                            out << g.mostrarSeccion(id: it.id, idioma: session.idioma.id, tipo: "Borrador")
+                        }
+                        out << "</div>"
+                    }
+                }
+                break;
+        }
+        out << "</div>"
+
+
+    }
+
+    def imports = {
+        def sitio = session.sitio
+        if(session.sitio){
+            def paginas = Pagina.findAllBySitio(sitio)
+            def path = 'css/menu/' + ((sitio.tipoMenu != null) ? sitio.tipoMenu : 'deepBlue')
+            println "path " + path
+            out << '<link rel="stylesheet" href="' + resource(dir: path, file: 'menu_style.css') + '" type="text/css" />'
+        }
+//        out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/js', file: 'jquery-1.4.2.min.js') + '"></script>'
+        //        out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/js', file: 'jquery-ui-1.8.5.custom.min.js') + '"></script>'
+        //        out << '<link href="' + resource(dir: 'js/jquery/css/dark-hive', file: 'jquery-ui-1.8.5.custom.css') + '" rel="stylesheet" type="text/css" />'
+    }
+
+    def importsWeb = {
+        def sitio = session.sitio
+        if(session.sitio){
+            def paginas = Pagina.findAllBySitio(sitio)
+            def path = 'css/menu/' + ((sitio.tipoMenu != null) ? sitio.tipoMenu : 'deepBlue')
+            println "path " + path
+            out << '<link rel="stylesheet" href="' + resource(dir: path, file: 'menu_style.css') + '" type="text/css" />'
+
+            out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/js', file: 'jquery-1.4.2.min.js') + '"></script>'
+            out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/js', file: 'jquery-ui-1.8.5.custom.min.js') + '"></script>'
+            out << '<link href="' + resource(dir: 'js/jquery/css/dark-hive', file: 'jquery-ui-1.8.5.custom.css') + '" rel="stylesheet" type="text/css" />'
+        }
+    }
+
+    def mostrarMenuPag = {attrs ->
+        def sitio = session.sitio
+        /* todo  borrar esto*/
+        if (!session.idioma)
+            session.idioma = Idioma.findByNombre("Español")
+        def paginas = Pagina.findAllBySitio(sitio, ["sort": "orden"])
+        def idioma = session.idioma
+        def frases = []
+        println "menu " + idioma + " sitio " + sitio
+        out << "<ul class='menuSitio'>"
+        paginas.each {
+            def frase = Frase.find("from Frase where idioma=${idioma.id} and pagina=${it.id} ")
+            if (frase)
+                out << "<li index='${it.id}'><a href='${createLink(uri: "/")}pagina/${sitio.nombre}/${it.nombre}' target='${(attrs.tipo == "editor") ? "_blank" : ""}' ${(attrs.actual.toInteger() == it.id) ? "class='active'" : ""}>" + frase?.frase + "</a></li>"
+            //frases.add(frase)
+        }
+        out << "</ul>"
+
+    }
+
+    def mostrarSeccionEditar = {attrs ->
+        def id = attrs["id"]
+        def idIdioma = attrs["idioma"]
+        def tipo = attrs["tipo"]
+
+        def seccionesNoEliminables = ["Publicaciones"]
+
+        def seccion = Seccion.get(id)
+        def idioma = Idioma.get(idIdioma)
+        //println "css ${seccion.css}"
+        out << "<div id='${id}'  class='divSeccion' tipo='" + seccion.tipo + "' style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;width:${seccion.width}px;height:${(seccion.height) ? seccion.height : "40;"}px;${(seccion.css =~ "border") ? seccion.css : ("border: solid 1px black" + seccion.css)};${(seccion.css =~ "z-index") ? "" : "z-index:1;"}'>"
+
+        def btn = ['eliminar', 'editar', 'propiedades']
+        if (seccion.tipo == "Vacio") {
+            btn = ['eliminar', 'propiedades']
+        } else if (seccionesNoEliminables.contains(seccion.tipo)) {
+            btn = ['propiedades']
+        }
+
+        out << elm.barrita(title: seccion.tipo, botones: btn, float: 'right', id: seccion.id, param: "seccion=" + seccion.id + " tipo=" + seccion.tipo)
+
+//        out<<'<h3 class="ui-widget-header" id="'+seccion.id+'barra" style="margin:0px;position:relative;padding-left:5px;display:none;height:21px">'+seccion.tipo
+        //        out<<'<div class="ui-icon ui-icon-closethick botonDelete" seccion="'+seccion.id+'" title="Borrar sección" ></div> '
+        //        out<<'<div class="ui-icon ui-icon-document botonContenido" seccion="'+seccion.id+'" title="Editar contenido" tipo="'+seccion.tipo+'"></div>'
+        //        out<<'<div class="ui-icon ui-icon-pencil botonPropiedades" seccion="'+seccion.id+'" title="Editar Propiedades" ></div> '
+        //        out<<'</h3>'
+
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.id" id="' + seccion.id + 'id" value="' + seccion.id + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.top" id="' + seccion.id + 'top" value="' + seccion.top + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.izq" id="' + seccion.id + 'izq" value="' + seccion.izq + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.width" id="' + seccion.id + 'wid" value="' + seccion.width + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.height" id="' + seccion.id + 'hei" value="' + ((seccion.height) ? seccion.height : "40px") + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.css" id="' + seccion.id + 'css" value="' + seccion.css + '">'
+        out << "<div id='${seccion.id}Contenido'>"
+        switch (seccion.tipo) {
+            case "Texto":
+                seccion.frases.each {
+                    if (it.idioma == idioma && it.estado == tipo)
+                        out << it.frase
+                }
+                break;
+            case "Link":
+                seccion.frases.each {
+                    if (it.idioma == idioma && it.estado == tipo)
+                        out << it.frase
+                }
+                break;
+            case "Foto":
+                def image = seccion.foto
+                out << ig.img(["src": g.createLink(action: 'showImage', controller: 'image', id: image?.id), "alt": image?.caption, "title": image?.caption, "thumbnailSrc": g.createLink(action: 'showImage', controller: 'image', id: image?.id, params: [thumbnail: true])])
+                break;
+            case "Galeria":
+                def gal = seccion.galeria
+
+                def parms = [:]
+                parms.galeria = gal
+                if (seccion.galeria) {
+                    def props = gal.propiedades
+                    def parts = props.split(",")
+                    parts.each {
+                        def p = it.split(":")
+                        if (p.size() == 2) {
+                            parms[p[0]] = p[1]
+                        }
+                    }
+
+                    out << gl.renderGal(parms)
+                }
+                break;
+        }
+        out << "</div>"
+        out << "</div>"
+    }
+
+}
