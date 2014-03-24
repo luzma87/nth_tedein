@@ -1,6 +1,8 @@
 package nth
 
-class ContactoController {
+import nth.seguridad.Shield
+
+class ContactoController extends Shield  {
 
     def getTb(seccion, idioma) {
         def tb = ""
