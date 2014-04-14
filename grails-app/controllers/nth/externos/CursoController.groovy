@@ -25,7 +25,7 @@ class CursoController extends Shield {
     }
 
     def cambiarEstado = {
-        def persona = Persona.get(params.id)
+        def persona = Persona.get(params.id.toLong())
         persona.contactado = params.estado.toInteger()
         if (persona.save(flush: true)) {
             render "OK"
@@ -35,7 +35,7 @@ class CursoController extends Shield {
     }
 
     def index = {
-        redirect(action: "list", params: params)
+        redirect(action: "inscritos", params: params)
     }
 
     def list = {
