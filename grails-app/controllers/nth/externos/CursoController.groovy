@@ -11,7 +11,7 @@ class CursoController extends Shield {
     }
 
     def tablaInscritos = {
-        def curso = Curso.get(params.curso)
+        def curso = Curso.get(params.curso.toLong())
         def estado = params.estado.toInteger()
 
         def personas = Persona.withCriteria {
